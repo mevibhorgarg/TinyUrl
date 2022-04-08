@@ -1,18 +1,30 @@
 package com.wissen.tinyurl.model.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
+@Table
 public class Url {
 
     @Id
+    @GeneratedValue
     private Integer id;
     private String originalUrl;
     private String sortUrl;
     private Timestamp createDate;
     private Timestamp expireDate;
+    @ManyToOne(cascade = {CascadeType.MERGE})
+    @JoinColumn(name="user_id")
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public Integer getId() {
         return id;

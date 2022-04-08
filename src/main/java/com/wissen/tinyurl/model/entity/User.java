@@ -2,22 +2,24 @@ package com.wissen.tinyurl.model.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table
 public class User {
 
     @Id
-    private Integer UserId;
+    private Integer userId;
     private String name;
     private Long phoneNumber;
     private String email;
 
     public Integer getUserId() {
-        return UserId;
+        return userId;
     }
 
     public void setUserId(Integer userId) {
-        UserId = userId;
+        this.userId = userId;
     }
 
     public String getName() {
