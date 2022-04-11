@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UrlRepo extends JpaRepository<Url, Integer> {
 
-    @Query("SELECT a.originalUrl FROM Url a WHERE a.sortUrl=?1")
-    String getLongUrl(String shortUrl);
+    @Query("SELECT a FROM Url a WHERE a.sortUrl=?1")
+    Url getLongUrl(String shortUrl);
 }

@@ -1,10 +1,13 @@
 package com.wissen.tinyurl.model.entity;
 
+import org.springframework.data.redis.core.RedisHash;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
 @Table
+@RedisHash("Url")
 public class Url {
 
     @Id
