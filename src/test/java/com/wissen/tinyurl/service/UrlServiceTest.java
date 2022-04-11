@@ -1,29 +1,63 @@
 package com.wissen.tinyurl.service;
 
 import com.wissen.tinyurl.mapper.UrlServiceMapper;
+import com.wissen.tinyurl.model.UrlRequest;
+import com.wissen.tinyurl.model.UrlResponse;
+import com.wissen.tinyurl.model.entity.Url;
+import com.wissen.tinyurl.model.entity.User;
+import com.wissen.tinyurl.repo.UrlRepo;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@RunWith(MockitoJUnitRunner.class)
+
+@ContextConfiguration(classes = {UrlService.class})
+@ExtendWith(MockitoExtension.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UrlServiceTest {
 
+    @Spy
+    private UrlServiceMapper urlServiceMapper;
+    @Spy
+    private UrlExpireCheckService urlExpireCheckService;
     @Mock
-    UrlServiceMapper urlServiceMapper;
-    @Mock
-    UrlExpireCheckService urlExpireCheckService;
+    private UrlRepo urlRepo;
     @InjectMocks
-    UrlService urlService;
+    private UrlService urlService;
+    UrlRequest urlRequest= new UrlRequest();
+    User user= new User();
+    Url originalUrl= new Url();
 
     @Test
     void createTinyUrl() {
+        urlRequest.setOriginalUrl("google.com");
+        user.setUserId(1);
+        user.setEmail("123@gmail.com");
+        user.setName("Vibhor");
+        user.setPhoneNumber(1234L);
+        UrlResponse response = urlService.createTinyUrl(urlRequest);
+        Assert.assertEquals("000q0V", response.getShortUrl());
     }
 
     @Test
     void getLongUrl() {
+        Timestamp time= Timestamp.valueOf(LocalDateTime.now().plusHours(1));
+        originalUrl.setOriginalUrl("google.com");
+        originalUrl.setExpireDate(time);
+        Mockito.when(urlRepo.getLongUrl("test")).thenReturn(originalUrl);
+        String result= urlService.getLongUrl("test");
+        Assert.assertEquals("google.com", originalUrl.getOriginalUrl());
     }
 }
