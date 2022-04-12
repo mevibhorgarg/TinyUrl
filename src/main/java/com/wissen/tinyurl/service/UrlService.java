@@ -9,6 +9,9 @@ import com.wissen.tinyurl.model.entity.Url;
 import com.wissen.tinyurl.repo.UrlRepo;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +36,17 @@ public class UrlService {
     public UrlResponse createTinyUrl(UrlRequest urlRequest) {
         UrlResponse urlResponse = new UrlResponse();
         String shortUrl = encode();
+        updateCache(shortUrl, urlRequest);
         Url url = urlServiceMapper.mapUrlFromUrlRequest(urlRequest, shortUrl);
         urlRepo.save(url);
+        LOGGER.info("Persisted UrlDetails : {}", url);
         urlResponse.setShortUrl(shortUrl);
         return urlResponse;
+    }
+
+    @CachePut(cacheNames = "url", key="#shortUrl")
+    private String updateCache(String shortUrl, UrlRequest urlRequest) {
+        return urlRequest.getOriginalUrl();
     }
 
     private String encode() {
@@ -56,14 +66,22 @@ public class UrlService {
         return sb.reverse().toString();
     }
 
+    @Cacheable(cacheNames = "url", key="#shortUrl")
     public String getLongUrl(String shortUrl) {
         Url originalUrl = urlRepo.getLongUrl(shortUrl);
+        LOGGER.info("Fetched UrlDetails : {}", originalUrl);
         if(ObjectUtils.isEmpty(originalUrl) || StringUtils.isEmpty(originalUrl.getOriginalUrl())){
             throw new UrlShortenerException("There is no original URL for shortUrl: " + shortUrl);
         }
         if(urlExpireCheckService.expireCheck(originalUrl.getExpireDate())){
+            removeCache(shortUrl, originalUrl.getOriginalUrl());
             throw new UrlExpiredException("URL has expired");
         }
         return originalUrl.getOriginalUrl();
+    }
+
+    @CacheEvict(cacheNames = "url", key="#shortUrl")
+    private String removeCache(String shortUrl, String originalUrl) {
+        return originalUrl;
     }
 }

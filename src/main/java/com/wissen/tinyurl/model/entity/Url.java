@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Table
-@RedisHash("Url")
+//@RedisHash("Url")
 public class Url {
 
     @Id
@@ -67,5 +67,17 @@ public class Url {
 
     public void setExpireDate(Timestamp expireDate) {
         this.expireDate = expireDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Url{" +
+                "id=" + id +
+                ", originalUrl='" + originalUrl + '\'' +
+                ", sortUrl='" + sortUrl + '\'' +
+                ", createDate=" + createDate +
+                ", expireDate=" + expireDate +
+                ", user=" + user +
+                '}';
     }
 }

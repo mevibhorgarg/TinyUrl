@@ -1,5 +1,7 @@
 package com.wissen.tinyurl.service;
 
+import com.wissen.tinyurl.exception.UrlExpiredException;
+import com.wissen.tinyurl.exception.UrlShortenerException;
 import com.wissen.tinyurl.mapper.UrlServiceMapper;
 import com.wissen.tinyurl.model.UrlRequest;
 import com.wissen.tinyurl.model.UrlResponse;
@@ -59,5 +61,35 @@ class UrlServiceTest {
         Mockito.when(urlRepo.getLongUrl("test")).thenReturn(originalUrl);
         String result= urlService.getLongUrl("test");
         Assert.assertEquals("google.com", originalUrl.getOriginalUrl());
+    }
+
+    @Test
+    void getLongUrlForException() {
+        Timestamp time= Timestamp.valueOf(LocalDateTime.now());
+        originalUrl.setOriginalUrl("google.com");
+        originalUrl.setExpireDate(time);
+        Mockito.when(urlRepo.getLongUrl("test")).thenReturn(originalUrl);
+        try{
+            urlService.getLongUrl("test");
+        }
+        catch (UrlExpiredException e){
+            Assert.assertEquals("URL has expired", e.getMessage());
+        }
+
+    }
+
+    @Test
+    void getLongUrlForExceptionEmptyObject() {
+        Timestamp time= Timestamp.valueOf(LocalDateTime.now());
+        originalUrl.setOriginalUrl("google.com");
+        originalUrl.setExpireDate(time);
+        Mockito.when(urlRepo.getLongUrl("test")).thenReturn(new Url());
+        try{
+            urlService.getLongUrl("test");
+        }
+        catch (UrlShortenerException e){
+            Assert.assertEquals("There is no original URL for shortUrl: test", e.getMessage());
+        }
+
     }
 }
