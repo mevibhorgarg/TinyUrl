@@ -22,7 +22,6 @@ public class UrlShorteningController {
 
     @PostMapping("/tinyurl")
     public UrlResponse createTinyUrl(@RequestBody @Valid UrlRequest urlRequest){
-
         return urlService.createTinyUrl(urlRequest);
     }
 

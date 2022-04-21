@@ -38,6 +38,8 @@ dependencies {
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 	// https://mvnrepository.com/artifact/mysql/mysql-connector-java
 	implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.28'
+	implementation 'org.springframework.kafka:spring-kafka'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
 
 
 }

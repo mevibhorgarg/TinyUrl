@@ -3,6 +3,7 @@ package com.wissen.tinyurl.service;
 import com.wissen.tinyurl.exception.UrlExpiredException;
 import com.wissen.tinyurl.exception.UrlShortenerException;
 import com.wissen.tinyurl.mapper.UrlServiceMapper;
+import com.wissen.tinyurl.model.CounterRequest;
 import com.wissen.tinyurl.model.UrlRequest;
 import com.wissen.tinyurl.model.UrlResponse;
 import com.wissen.tinyurl.model.entity.Url;
@@ -19,7 +20,8 @@ import org.slf4j.LoggerFactory;
 @Service
 public class UrlService {
 
-    Long counter = 100000l;
+    Long first=0L;
+    Long last=0L;
     String base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private final UrlRepo urlRepo;
@@ -35,7 +37,9 @@ public class UrlService {
 
     public UrlResponse createTinyUrl(UrlRequest urlRequest) {
         UrlResponse urlResponse = new UrlResponse();
-        String shortUrl = encode();
+
+        String shortUrl = base62Encode(first);
+        first++;
         updateCache(shortUrl, urlRequest);
         Url url = urlServiceMapper.mapUrlFromUrlRequest(urlRequest, shortUrl);
         urlRepo.save(url);
@@ -47,11 +51,6 @@ public class UrlService {
     @CachePut(cacheNames = "url", key="#shortUrl")
     private String updateCache(String shortUrl, UrlRequest urlRequest) {
         return urlRequest.getOriginalUrl();
-    }
-
-    private String encode() {
-        counter++;
-        return base62Encode(counter);
     }
 
     private String base62Encode(long value) {
@@ -74,14 +73,14 @@ public class UrlService {
             throw new UrlShortenerException("There is no original URL for shortUrl: " + shortUrl);
         }
         if(urlExpireCheckService.expireCheck(originalUrl.getExpireDate())){
-            removeCache(shortUrl, originalUrl.getOriginalUrl());
             throw new UrlExpiredException("URL has expired");
         }
         return originalUrl.getOriginalUrl();
     }
 
-    @CacheEvict(cacheNames = "url", key="#shortUrl")
-    private String removeCache(String shortUrl, String originalUrl) {
-        return originalUrl;
+    public void updateCounter(CounterRequest counterRequest) {
+        first= counterRequest.getFirst();
+        last= counterRequest.getLast();
+        System.out.println(first +"" + last);
     }
 }

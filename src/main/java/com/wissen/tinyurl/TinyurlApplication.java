@@ -12,4 +12,5 @@ public class TinyurlApplication {
 		SpringApplication.run(TinyurlApplication.class, args);
 	}
 
+
 }
